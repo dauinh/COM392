@@ -5,17 +5,21 @@ from torch.optim import lr_scheduler
 import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
+
 import os
 import time
+import copy
+
+from __init__ import PATH
 from dataset import Dataset
 from model import ResNet18, ResBlock, Net
 
-PATH = os.path.dirname(os.path.realpath(__file__))
-print(PATH)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+# Import dataset
 dataset = Dataset()
 dataloaders, class_names, dataset_sizes = dataset.get_dataset()
+
 
 def visualize_model(model, num_images=6):
   was_training = model.training
@@ -42,6 +46,8 @@ def visualize_model(model, num_images=6):
           model.train(mode=was_training)
           return
     model.train(mode=was_training)
+  
+  plt.pause(3)
 
 
 def imshow(inp, title=None):
@@ -54,7 +60,7 @@ def imshow(inp, title=None):
   plt.imshow(inp)
   if title is not None:
       plt.title(title)
-  plt.pause(0.001)  # pause a bit so that plots are updated
+  plt.pause(5)  # pause a bit so that plots are updated
 
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
@@ -126,12 +132,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
 def main():
   # Get a batch of training data
-  # inputs, classes = next(iter(dataloaders['train']))
+  inputs, classes = next(iter(dataloaders['train']))
 
   # Make a grid from batch
-  # out = torchvision.utils.make_grid(inputs)
+  out = torchvision.utils.make_grid(inputs)
 
-  # imshow(out, title=[class_names[x] for x in classes])
+  imshow(out, title=[class_names[x] for x in classes])
   # resnet18 = ResNet18(3, ResBlock, outputs=2)
   model = Net()
   model = model.to(device)
@@ -140,10 +146,18 @@ def main():
   optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
   exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-  model = train_model(model, criterion, optimizer, exp_lr_scheduler,
-                       num_epochs=2)
-  torch.save(model.state_dict(), PATH)
-  print('hello world')
+  # model = train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=2)
+
+  # torch.save(model.state_dict(), os.path.join(PATH, r'weights.pth'))
+
+  visualize_model(model)
+
+  # Print model's state_dict
+  print("Model's state_dict:")
+  for param_tensor in model.state_dict():
+      print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+
+  print('\n------------------------------------')
 
 if __name__ == "__main__":
   main()
