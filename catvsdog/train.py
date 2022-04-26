@@ -12,7 +12,7 @@ import copy
 
 from __init__ import PATH
 from dataset import Dataset
-from model import ResNet18, ResBlock, Net
+from model import Block, Net
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -139,7 +139,7 @@ def main():
 
   imshow(out, title=[class_names[x] for x in classes])
   # resnet18 = ResNet18(3, ResBlock, outputs=2)
-  model = Net()
+  model = Net(3, Block)
   model = model.to(device)
 
   criterion = nn.CrossEntropyLoss()
